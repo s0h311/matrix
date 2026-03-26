@@ -14,7 +14,7 @@ Matrix spawns AFK (away from keyboard) agents (each named Smith) that work on Gi
 ## Setup
 
 - Clone this repo, copy the absolute path on filesystem
-- Create a `.smith/config.json` file on root of your project (see [example config](./config.example.json))
+- Create a `.matrix/config.json` file on root of your project (see [example config](./config.example.json))
 - Create a script for running Matrix in your projects `package.json`.
 
 ```json
@@ -22,7 +22,7 @@ Matrix spawns AFK (away from keyboard) agents (each named Smith) that work on Gi
   ...,
   "scripts": {
     ...,
-    "matrix": "node --env-file=.env <Matrix path>/src/index.ts"
+    "matrix": "node --env-file=.env <Path to Matrix>/src/index.ts"
   },
   ...
 }

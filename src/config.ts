@@ -15,7 +15,7 @@ export type Checks = {
   test?: string
 }
 
-const CONFIG_FILE_PATH = '.smith/config.json'
+const CONFIG_FILE_PATH = '.matrix/config.json'
 
 export function getConfig(): MatrixConfig {
   const contents = readFileSync(CONFIG_FILE_PATH, { encoding: 'utf-8' })

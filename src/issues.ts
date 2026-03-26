@@ -5,8 +5,8 @@ const octokit = new Octokit({
   auth: process.env.GH_TOKEN,
 })
 
-export const OPEN_ISSUES_FILE_PATH = '.smith/open_issues.json'
-export const LAST_COMMITS_FILE_PATH = '.smith/last_commits.json'
+export const OPEN_ISSUES_FILE_PATH = '.matrix/open_issues.json'
+export const LAST_COMMITS_FILE_PATH = '.matrix/last_commits.json'
 
 const config = getConfig()
 const OWNER = config.github.owner

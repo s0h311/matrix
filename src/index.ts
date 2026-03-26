@@ -1,18 +1,21 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, copyFileSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import { findOpenIssues, getLastCommits, LAST_COMMITS_FILE_PATH, OPEN_ISSUES_FILE_PATH } from './issues.ts'
 import { getConfig } from './config.ts'
 import { runChecks } from './checks.ts'
 
 const config = getConfig()
-const PROMPT_FILE_PATH = `${import.meta.dirname}/../prompt.md`
+const SRC_PROMPT_FILE_PATH = `${import.meta.dirname}/../prompt.md`
+const TMP_PROMPT_FILE_PATH = '.matrix/prompt.md'
 
 await main()
 
 async function main() {
-  if (!existsSync('.smith')) {
-    mkdirSync('.smith')
+  if (!existsSync('.matrix')) {
+    mkdirSync('.matrix')
   }
+
+  copyFileSync(SRC_PROMPT_FILE_PATH, TMP_PROMPT_FILE_PATH)
 
   try {
     for (let i = 1; i <= config.maxIterations; i++) {
@@ -57,6 +60,7 @@ async function main() {
   } finally {
     rmSync(OPEN_ISSUES_FILE_PATH)
     rmSync(LAST_COMMITS_FILE_PATH)
+    rmSync(TMP_PROMPT_FILE_PATH)
   }
 }
 
@@ -67,9 +71,7 @@ async function runIteration() {
   writeFileSync(OPEN_ISSUES_FILE_PATH, JSON.stringify(openIssues), { encoding: 'utf-8' })
   writeFileSync(LAST_COMMITS_FILE_PATH, JSON.stringify(lastCommits), { encoding: 'utf-8' })
 
-  const prompt = readFileSync(PROMPT_FILE_PATH, { encoding: 'utf-8' })
-
-  return await runAgentInSandbox(`@${OPEN_ISSUES_FILE_PATH} @${LAST_COMMITS_FILE_PATH} ${prompt}`)
+  return await runAgentInSandbox(`@${OPEN_ISSUES_FILE_PATH} @${LAST_COMMITS_FILE_PATH} @${TMP_PROMPT_FILE_PATH}`)
 }
 
 async function runAgentInSandbox(prompt: string): Promise<string> {

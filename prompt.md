@@ -41,7 +41,7 @@ Stay focused — do not fix unrelated things.
 
 Make a git commit. The commit message must:
 
-1. Commit to main branch
+1. Be made to a feature branch for PRD (specific to whole feature)
 2. Start with `SMITH:` prefix
 3. Include task completed + PRD reference
 4. Key decisions made
