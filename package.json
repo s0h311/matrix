@@ -5,7 +5,9 @@
   "license": "Apache-2.0",
   "type": "module",
   "main": "src/index.ts",
-  "scripts": {},
+  "scripts": {
+    "fmt": "oxfmt"
+  },
   "dependencies": {
     "@octokit/rest": "^22.0.1"
   },
