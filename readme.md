@@ -46,8 +46,12 @@ _Example:_
   ...,
   "checks": {
     "fmt": "pnpm fmt",
-    "lint": "pnpm lint",
-    "test": "pnpm test"
+    "lint": "pnpm lint --format json",
+    "test": "pnpm test --reporter agent"
   }
 }
 ```
+
+> We recommend to use as token efficient as possible. Especially,
+> when you can save tokens without the code quality being degraded.
+> This is why the additional `--format json` and `reporter agent` options are used for checks.
