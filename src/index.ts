@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, copyFileSync } from 'node:fs'
+import { writeFileSync, existsSync, mkdirSync, rmSync, copyFileSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import { findOpenIssues, getLastCommits, LAST_COMMITS_FILE_PATH, OPEN_ISSUES_FILE_PATH } from './issues.ts'
 import { getConfig } from './config.ts'
