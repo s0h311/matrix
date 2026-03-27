@@ -1,9 +1,5 @@
-import { Octokit } from '@octokit/rest'
 import { getConfig } from './config.ts'
-
-const octokit = new Octokit({
-  auth: process.env.GH_TOKEN,
-})
+import { createOctokit } from './octokit.ts'
 
 export const OPEN_ISSUES_FILE_PATH = '.matrix/open_issues.json'
 export const LAST_COMMITS_FILE_PATH = '.matrix/last_commits.json'
@@ -13,6 +9,8 @@ const OWNER = config.github.owner
 const REPO = config.github.repo
 
 export async function findOpenIssues() {
+  const octokit = createOctokit()
+
   const openIssues = await octokit.rest.issues.listForRepo({
     owner: OWNER,
     repo: REPO,
@@ -37,6 +35,8 @@ export async function findOpenIssues() {
 }
 
 export async function getLastCommits() {
+  const octokit = createOctokit()
+
   const result = []
 
   const commitIterator = octokit.paginate.iterator(octokit.rest.repos.listCommits, {
@@ -50,9 +50,10 @@ export async function getLastCommits() {
       const commitMessage = commit.commit.message.toLowerCase()
 
       if (commitMessage.includes('ralph:') || commitMessage.includes('smith:')) {
+        // TODO remove "ralph:" after a while
         result.push({
           sha: commit.sha,
-          message: commit.commit.message,
+          message: commit.commit.message.replaceAll('RALPH:', 'SMITH:'), // TODO remove replacement
           date: commit.commit.committer?.date ?? null,
         })
       }
