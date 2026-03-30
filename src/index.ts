@@ -1,6 +1,13 @@
 import { writeFileSync, existsSync, mkdirSync, rmSync, copyFileSync } from 'node:fs'
 import { execSync } from 'node:child_process'
-import { findOpenIssues, getLastCommits, LAST_COMMITS_FILE_PATH, OPEN_ISSUES_FILE_PATH } from './issues.ts'
+import {
+  type Commit,
+  findOpenIssues,
+  findLastCommits,
+  type Issue,
+  LAST_COMMITS_FILE_PATH,
+  OPEN_ISSUES_FILE_PATH,
+} from './issues.ts'
 import { getConfig } from './config.ts'
 import { runChecks } from './checks.ts'
 
@@ -19,11 +26,20 @@ async function main() {
 
   try {
     for (let i = 1; i <= config.maxIterations; i++) {
-      console.log(`=====ITERATION ${i} / ${config.maxIterations}=====\n\n`)
+      console.info(`=====ITERATION ${i} / ${config.maxIterations}=====\n\n`)
+
+      const { openIssues } = await fetchAndPersistOpenIssuesAndLastCommits()
+
+      if (openIssues.length === 0) {
+        console.info(`\n\n=====NO OPEN ISSUES FOUND=====`)
+
+        break
+      }
+
       const result = await runIteration()
 
       if (result.includes('<promise>COMPLETE</promise>')) {
-        console.log(`\n\n=====COMPLETED AFTER ${i} ITERATIONS=====`)
+        console.info(`\n\n=====COMPLETED AFTER ${i} ITERATIONS=====`)
         break
       }
 
@@ -52,6 +68,8 @@ async function main() {
           'Fix failing checks. When you validated that the problems are fixed, commit to main branch.',
         )
 
+        console.info('\n\n=====SOME CHECK FAILED. FIXING NOW=====')
+
         await runAgentInSandbox(additionalPrompts.join('\n'))
       }
     }
@@ -65,12 +83,6 @@ async function main() {
 }
 
 async function runIteration() {
-  const openIssues = await findOpenIssues()
-  const lastCommits = await getLastCommits()
-
-  writeFileSync(OPEN_ISSUES_FILE_PATH, JSON.stringify(openIssues), { encoding: 'utf-8' })
-  writeFileSync(LAST_COMMITS_FILE_PATH, JSON.stringify(lastCommits), { encoding: 'utf-8' })
-
   return await runAgentInSandbox(`@${OPEN_ISSUES_FILE_PATH} @${LAST_COMMITS_FILE_PATH} @${TMP_PROMPT_FILE_PATH}`)
 }
 
@@ -80,4 +92,20 @@ async function runAgentInSandbox(prompt: string): Promise<string> {
   return execSync(cmd, {
     encoding: 'utf-8',
   })
+}
+
+async function fetchAndPersistOpenIssuesAndLastCommits(): Promise<{
+  openIssues: Issue[]
+  lastCommits: Commit[]
+}> {
+  const openIssues = await findOpenIssues()
+  const lastCommits = await findLastCommits()
+
+  writeFileSync(OPEN_ISSUES_FILE_PATH, JSON.stringify(openIssues), { encoding: 'utf-8' })
+  writeFileSync(LAST_COMMITS_FILE_PATH, JSON.stringify(lastCommits), { encoding: 'utf-8' })
+
+  return {
+    openIssues,
+    lastCommits,
+  }
 }

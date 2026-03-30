@@ -34,7 +34,7 @@ export async function findOpenIssues() {
   return result
 }
 
-export async function getLastCommits() {
+export async function findLastCommits() {
   const octokit = createOctokit()
 
   const result = []
@@ -66,3 +66,6 @@ export async function getLastCommits() {
 
   return result
 }
+
+export type Issue = Awaited<ReturnType<typeof findOpenIssues>>[0]
+export type Commit = Awaited<ReturnType<typeof findLastCommits>>[0]
