@@ -1,49 +1,44 @@
 # Matrix
 
-## What is Matrix ?
+## What is Matrix?
 
-Matrix spawns AFK (away from keyboard) agents (each named Smith) that work on Github issues subsequently.
+Matrix spawns AFK (away from keyboard) agents — each named Smith — that autonomously work through GitHub issues one by one.
 
 ## Requirements
 
 - `node >= 24`
-- `GH_TOKEN` environment variable with sufficient permissions in a `.env` file
+- A `.env` file with a `GH_TOKEN` environment variable with sufficient permissions
 - Claude Code subscription
-- A PRD and subtasks as Github issues
+- A PRD broken down into subtasks as GitHub issues
 
 ## Setup
 
-- Clone this repo, copy the absolute path on filesystem
-- Create a `.matrix/config.json` file on root of your project (see [example config](./config.example.json))
-- Create a script for running Matrix in your projects `package.json`.
+1. Clone this repo and copy its absolute path.
+2. Create a `.matrix/config.json` file at the root of your project (see [example config](./config.example.json)).
+3. Add a script to your project's `package.json`:
 
 ```json
 {
-  ...,
   "scripts": {
-    ...,
-    "matrix": "node --env-file=.env <Path to Matrix>/src/index.ts"
-  },
-  ...
+    "matrix": "node --env-file=.env <path to Matrix>/src/index.ts"
+  }
 }
 ```
 
 ## Start building
 
-Run `npm run matrix` or `pnpm matrix`
+Run `npm run matrix` or `pnpm matrix`.
 
-## Code Qualitiy
+## Code Quality
 
 ### Deterministic checks
 
-It's recommended to use deterministic code quality and correctnes checks. Use the `checks` option in config to achieve this.
-You can configure three checks: `checks.fmt`, `checks.lint` and `checks.test`.
+It is recommended to configure deterministic code quality and correctness checks using the `checks` option in your config. Three checks are supported: `checks.fmt`, `checks.lint`, and `checks.test`.
 
 _Example:_
 
 ```json
 {
-  ...,
   "checks": {
     "fmt": "pnpm fmt",
     "lint": "pnpm lint --format json",
@@ -52,6 +47,4 @@ _Example:_
 }
 ```
 
-> We recommend to use as token efficient as possible. Especially,
-> when you can save tokens without the code quality being degraded.
-> This is why the additional `--format json` and `reporter agent` options are used for checks.
+> Keep check output as token-efficient as possible. The `--format json` and `--reporter agent` flags shown above are good examples — they reduce noise without sacrificing signal.
