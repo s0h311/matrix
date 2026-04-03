@@ -31,7 +31,7 @@ export async function runChecks(checks: Checks): Promise<CheckResult> {
   }
 }
 
-async function runCmd(cmd: string): Promise<boolean> {
+export async function runCmd(cmd: string): Promise<boolean> {
   try {
     execSync(cmd, {
       encoding: 'utf-8',

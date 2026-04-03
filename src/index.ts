@@ -9,7 +9,7 @@ import {
   OPEN_ISSUES_FILE_PATH,
 } from './issues.ts'
 import { getConfig } from './config.ts'
-import { runChecks } from './checks.ts'
+import { runChecks, runCmd } from './checks.ts'
 
 const config = getConfig()
 const SRC_PROMPT_FILE_PATH = `${import.meta.dirname}/../prompt.md`
@@ -31,7 +31,7 @@ async function main() {
       const { openIssues } = await fetchAndPersistOpenIssuesAndLastCommits()
 
       if (openIssues.length === 0) {
-        console.info(`\n\n=====NO OPEN ISSUES FOUND=====`)
+        console.info(`\n\n=====NO OPEN ISSUES FOUND=====`) // TODO improve this
 
         break
       }
@@ -47,13 +47,16 @@ async function main() {
         continue
       }
 
-      const { fmt, lint, test } = await runChecks(config.checks)
+      if (config.checks.fmt) {
+        await runCmd(config.checks.fmt)
+
+        await runCmd('git add -A')
+        await runCmd('git commit -m "fmt"')
+      }
+
+      const { lint, test } = await runChecks(config.checks)
 
       const additionalPrompts: string[] = ['Failed checks:']
-
-      if (!fmt) {
-        additionalPrompts.push('- formatter: use "pnpm fmt"')
-      }
 
       if (!lint) {
         additionalPrompts.push('- linter: use "pnpm lint"')
@@ -65,10 +68,10 @@ async function main() {
 
       if (additionalPrompts.length > 1) {
         additionalPrompts.push(
-          'Fix failing checks. When you validated that the problems are fixed, commit to main branch.',
+          'Fix failing checks. When you validated that the problems are fixed, commit the changes.',
         )
 
-        console.info('\n\n=====SOME CHECK FAILED. FIXING NOW=====')
+        console.info('\n\n=====SOME CHECKS FAILED. FIXING NOW=====')
 
         await runAgentInSandbox(additionalPrompts.join('\n'))
       }
