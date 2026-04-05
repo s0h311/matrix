@@ -20,6 +20,10 @@ export async function findOpenIssues() {
   const result = []
 
   for (const issue of openIssues.data) {
+    if (issue.pull_request) {
+      continue
+    }
+
     result.push({
       id: issue.id,
       number: issue.number,
