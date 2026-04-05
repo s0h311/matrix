@@ -49,9 +49,13 @@ async function main() {
 
       if (config.checks.fmt) {
         await runCmd(config.checks.fmt)
-
         await runCmd('git add -A')
-        await runCmd('git commit -m "fmt"')
+
+        const nothingStaged = await runCmd('git diff --cached --quiet')
+
+        if (!nothingStaged) {
+          await runCmd('git commit -m "fmt"')
+        }
       }
 
       const { lint, test } = await runChecks(config.checks)
@@ -79,9 +83,9 @@ async function main() {
   } catch (e) {
     console.error(e)
   } finally {
-    rmSync(OPEN_ISSUES_FILE_PATH)
-    rmSync(LAST_COMMITS_FILE_PATH)
-    rmSync(TMP_PROMPT_FILE_PATH)
+    rmSync(OPEN_ISSUES_FILE_PATH, { force: true })
+    rmSync(LAST_COMMITS_FILE_PATH, { force: true })
+    rmSync(TMP_PROMPT_FILE_PATH, { force: true })
   }
 }
 
