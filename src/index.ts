@@ -10,6 +10,7 @@ import {
 } from './issues.ts'
 import { getConfig } from './config.ts'
 import { runChecks, runCmd } from './checks.ts'
+import { usageLimitReached } from './usage.ts'
 
 const config = getConfig()
 const SRC_PROMPT_FILE_PATH = `${import.meta.dirname}/../prompt.md`
@@ -81,7 +82,15 @@ async function main() {
       }
     }
   } catch (e) {
-    console.error(e)
+    const limitReached = await usageLimitReached()
+
+    if (limitReached) {
+      console.info('\n\n=====CLAUDE CODE USAGE LIMIT HAS BEEN REACHED=====')
+    }
+
+    if (!limitReached) {
+      console.error(e)
+    }
   } finally {
     rmSync(OPEN_ISSUES_FILE_PATH, { force: true })
     rmSync(LAST_COMMITS_FILE_PATH, { force: true })
