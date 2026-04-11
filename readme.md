@@ -7,7 +7,10 @@ Matrix spawns AFK (away from keyboard) agents — each named Smith — that auto
 ## Requirements
 
 - `node >= 24`
-- A `.env` file with a `GH_TOKEN` environment variable with sufficient permissions
+- A `.env` file with a `GH_TOKEN` set as environment variable with at least the following permissions:
+  - Contents - Read-only
+  - Issues - Read and write
+  - Pull requests - Read and write
 - Claude Code subscription
 - A PRD broken down into subtasks as GitHub issues
 
