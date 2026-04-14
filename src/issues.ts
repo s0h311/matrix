@@ -1,3 +1,4 @@
+import { type } from 'node:os'
 import { getConfig } from './config.ts'
 import { createOctokit } from './octokit.ts'
 
@@ -7,6 +8,8 @@ export const LAST_COMMITS_FILE_PATH = '.matrix/last_commits.json'
 const config = getConfig()
 const OWNER = config.github.owner
 const REPO = config.github.repo
+
+const HITL_ONLY_LABEL = 'HITL only'
 
 export async function findOpenIssues() {
   const octokit = createOctokit()
@@ -20,7 +23,15 @@ export async function findOpenIssues() {
   const result = []
 
   for (const issue of openIssues.data) {
-    if (issue.pull_request) {
+    const isHitlOnly = issue.labels.some((label) => {
+      if (typeof label === 'string') {
+        return label === HITL_ONLY_LABEL
+      }
+
+      return label.name === HITL_ONLY_LABEL
+    })
+
+    if (issue.pull_request || isHitlOnly) {
       continue
     }
 
