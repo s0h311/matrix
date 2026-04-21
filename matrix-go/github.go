@@ -13,13 +13,13 @@ import (
 const hitlOnlyLabel = "HITL only"
 
 type Issue struct {
-	ID          int64   `json:"id"`
-	Number      int     `json:"number"`
-	Title       string  `json:"title"`
-	Body        *string `json:"body"`
-	Comments    int     `json:"comments"`
-	PullRequest *string `json:"pull_request"`
-	CreatedAt   string  `json:"created_at"`
+	ID          int64    `json:"id"`
+	Number      int      `json:"number"`
+	Title       string   `json:"title"`
+	Body        *string  `json:"body"`
+	Comments    []string `json:"comments,omitempty"`
+	PullRequest *string  `json:"pull_request"`
+	CreatedAt   string   `json:"created_at"`
 }
 
 type Commit struct {
@@ -73,12 +73,25 @@ func findOpenIssues(owner, repo string) ([]Issue, error) {
 				continue
 			}
 
+			var commentBodies []string
+			if issue.GetComments() > 0 {
+				cs, _, err := client.Issues.ListComments(ctx, owner, repo, issue.GetNumber(), nil)
+				if err != nil {
+					return nil, fmt.Errorf("list comments for issue %d: %w", issue.GetNumber(), err)
+				}
+				for _, c := range cs {
+					if b := c.GetBody(); b != "" {
+						commentBodies = append(commentBodies, b)
+					}
+				}
+			}
+
 			result = append(result, Issue{
 				ID:        issue.GetID(),
 				Number:    issue.GetNumber(),
 				Title:     issue.GetTitle(),
 				Body:      issue.Body,
-				Comments:  issue.GetComments(),
+				Comments:  commentBodies,
 				CreatedAt: issue.GetCreatedAt().Format("2006-01-02T15:04:05Z"),
 			})
 		}

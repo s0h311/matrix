@@ -1,4 +1,3 @@
-import { type } from 'node:os'
 import { getConfig } from './config.ts'
 import { createOctokit } from './octokit.ts'
 
@@ -35,12 +34,30 @@ export async function findOpenIssues() {
       continue
     }
 
+    const comments: string[] = []
+
+    if (issue.comments > 0) {
+      const commentsResponse = await octokit.rest.issues.listComments({
+        owner: OWNER,
+        repo: REPO,
+        issue_number: issue.number,
+      })
+
+      commentsResponse.data
+
+        .forEach(({ body }) => {
+          if (body) {
+            comments.push(body)
+          }
+        })
+    }
+
     result.push({
       id: issue.id,
       number: issue.number,
       title: issue.title,
       body: issue.body,
-      comments: issue.comments,
+      comments: commentBodies,
       pull_request: issue.pull_request,
       created_at: issue.created_at,
     })
