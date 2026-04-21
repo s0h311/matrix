@@ -57,7 +57,7 @@ export async function findOpenIssues() {
       number: issue.number,
       title: issue.title,
       body: issue.body,
-      comments: commentBodies,
+      comments: comments,
       pull_request: issue.pull_request,
       created_at: issue.created_at,
     })
@@ -81,11 +81,10 @@ export async function findLastCommits() {
     for (const commit of response.data) {
       const commitMessage = commit.commit.message.toLowerCase()
 
-      if (commitMessage.includes('ralph:') || commitMessage.includes('smith:')) {
-        // TODO remove "ralph:" after a while
+      if (commitMessage.includes('smith:')) {
         result.push({
           sha: commit.sha,
-          message: commit.commit.message.replaceAll('RALPH:', 'SMITH:'), // TODO remove replacement
+          message: commit.commit.message,
           date: commit.commit.committer?.date ?? null,
         })
       }
