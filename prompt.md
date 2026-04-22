@@ -1,6 +1,6 @@
 # ISSUES
 
-Issues JSON is provided at start of context. Parse it to get open issues with their bodies and comments.
+Issues JSON is provided at start of context. It contains `id`, `number`, `title`, and `blockers` for each open issue.
 
 You've also been passed the last 10 SMITH commits (SHA, date, full message). Review these to understand what work has been done.
 
@@ -18,7 +18,13 @@ TL;DR - build a tiny, end-to-end slice of the feature first, then expand it out.
 3. Polish and quick wins
 4. Refactors
 
-If all tasks are complete, output <promise>COMPLETE</promise>.
+# FETCH ISSUE DETAILS
+
+Once you've selected an issue, fetch its full body and comments before exploring the repo:
+
+```
+gh issue view <number> --json body,comments
+```
 
 # EXPLORATION
 

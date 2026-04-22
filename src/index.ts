@@ -32,17 +32,12 @@ async function main() {
       const { openIssues } = await fetchAndPersistOpenIssuesAndLastCommits()
 
       if (openIssues.length === 0) {
-        console.info(`\n\n=====NO OPEN ISSUES FOUND=====`) // TODO improve this
+        console.info(`\n\n=====NO OPEN ISSUES FOUND=====`)
 
         break
       }
 
-      const result = await runIteration()
-
-      if (result.includes('<promise>COMPLETE</promise>')) {
-        console.info(`\n\n=====COMPLETED AFTER ${i} ITERATIONS=====`)
-        break
-      }
+      await runIteration()
 
       if (!config.checks) {
         continue
@@ -64,11 +59,11 @@ async function main() {
       const additionalPrompts: string[] = ['Failed checks:']
 
       if (!lint) {
-        additionalPrompts.push('- linter: use "pnpm lint"')
+        additionalPrompts.push(`- linter: use "${config.checks.lint}"`)
       }
 
       if (!test) {
-        additionalPrompts.push('- tests: use "pnpm test"')
+        additionalPrompts.push(`- tests: use "${config.checks.test}"`)
       }
 
       if (additionalPrompts.length > 1) {
