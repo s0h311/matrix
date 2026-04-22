@@ -34,32 +34,19 @@ export async function findOpenIssues() {
       continue
     }
 
-    const comments: string[] = []
+    const blockers = await octokit.issues.listDependenciesBlockedBy({
+      owner: OWNER,
+      repo: REPO,
+      issue_number: issue.number,
+    })
 
-    if (issue.comments > 0) {
-      const commentsResponse = await octokit.rest.issues.listComments({
-        owner: OWNER,
-        repo: REPO,
-        issue_number: issue.number,
-      })
-
-      commentsResponse.data
-
-        .forEach(({ body }) => {
-          if (body) {
-            comments.push(body)
-          }
-        })
-    }
+    const blockedByIssues = blockers.data.map(({ number }) => number)
 
     result.push({
-      id: issue.id,
+      id: issue.id, // TODO find out whether we really need this
       number: issue.number,
       title: issue.title,
-      body: issue.body,
-      comments: commentBodies,
-      pull_request: issue.pull_request,
-      created_at: issue.created_at,
+      blockedByIssues,
     })
   }
 
@@ -81,11 +68,10 @@ export async function findLastCommits() {
     for (const commit of response.data) {
       const commitMessage = commit.commit.message.toLowerCase()
 
-      if (commitMessage.includes('ralph:') || commitMessage.includes('smith:')) {
-        // TODO remove "ralph:" after a while
+      if (commitMessage.includes('smith:')) {
         result.push({
           sha: commit.sha,
-          message: commit.commit.message.replaceAll('RALPH:', 'SMITH:'), // TODO remove replacement
+          message: commit.commit.message,
           date: commit.commit.committer?.date ?? null,
         })
       }
