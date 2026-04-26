@@ -15,9 +15,10 @@ type Config struct {
 }
 
 type Checks struct {
-	Fmt  string `json:"fmt,omitempty"`
-	Lint string `json:"lint,omitempty"`
-	Test string `json:"test,omitempty"`
+	Defer   bool   `json:"defer"`
+	FmtCmd  string `json:"fmtCmd,omitempty"`
+	LintCmd string `json:"lintCmd,omitempty"`
+	TestCmd string `json:"testCmd,omitempty"`
 }
 
 func getConfig() (*Config, error) {

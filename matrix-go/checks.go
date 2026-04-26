@@ -10,11 +10,11 @@ func runCmd(cmd string) bool {
 func runChecks(c *Checks) (lint, test bool) {
 	lint = true
 	test = true
-	if c.Lint != "" {
-		lint = runCmd(c.Lint)
+	if c.LintCmd != "" {
+		lint = runCmd(c.LintCmd)
 	}
-	if c.Test != "" {
-		test = runCmd(c.Test)
+	if c.TestCmd != "" {
+		test = runCmd(c.TestCmd)
 	}
 	return
 }

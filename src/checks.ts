@@ -6,16 +6,16 @@ type CheckResult = {
   test: boolean
 }
 
-export async function runChecks(checks: Checks): Promise<CheckResult> {
+export async function runLintAndTest(checks: Checks): Promise<CheckResult> {
   let lint = true
   let test = true
 
-  if (checks.lint) {
-    lint = await runCmd(checks.lint)
+  if (checks.lintCmd) {
+    lint = await runCmd(checks.lintCmd)
   }
 
-  if (checks.test) {
-    test = await runCmd(checks.test)
+  if (checks.testCmd) {
+    test = await runCmd(checks.testCmd)
   }
 
   return {

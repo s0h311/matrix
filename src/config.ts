@@ -10,9 +10,10 @@ type MatrixConfig = {
 }
 
 export type Checks = {
-  fmt?: string
-  lint?: string
-  test?: string
+  defer?: boolean
+  fmtCmd?: string
+  lintCmd?: string
+  testCmd?: string
 }
 
 const CONFIG_FILE_PATH = '.matrix/config.json'

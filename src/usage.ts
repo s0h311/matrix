@@ -1,11 +1,11 @@
 type UsageData = {
-  fiveHourUsage: number
+  fiveHoursUsage: number
 }
 
 export async function usageLimitReached(): Promise<boolean> {
   const usage = await getUsage()
 
-  return usage?.fiveHourUsage === 0
+  return usage?.fiveHoursUsage === 0
 }
 
 export async function getUsage(): Promise<UsageData | null> {

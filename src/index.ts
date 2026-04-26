@@ -9,7 +9,7 @@ import {
   OPEN_ISSUES_FILE_PATH,
 } from './issues.ts'
 import { getConfig } from './config.ts'
-import { runChecks, runCmd } from './checks.ts'
+import { runLintAndTest, runCmd } from './checks.ts'
 import { usageLimitReached } from './usage.ts'
 
 const config = getConfig()
@@ -39,42 +39,13 @@ async function main() {
 
       await runIteration()
 
-      if (!config.checks) {
-        continue
+      if (config.checks && !config.checks.defer) {
+        await runAllChecks()
       }
+    }
 
-      if (config.checks.fmt) {
-        await runCmd(config.checks.fmt)
-        await runCmd('git add -A')
-
-        const nothingStaged = await runCmd('git diff --cached --quiet')
-
-        if (!nothingStaged) {
-          await runCmd('git commit -m "fmt"')
-        }
-      }
-
-      const { lint, test } = await runChecks(config.checks)
-
-      const additionalPrompts: string[] = ['Failed checks:']
-
-      if (!lint) {
-        additionalPrompts.push(`- linter: use "${config.checks.lint}"`)
-      }
-
-      if (!test) {
-        additionalPrompts.push(`- tests: use "${config.checks.test}"`)
-      }
-
-      if (additionalPrompts.length > 1) {
-        additionalPrompts.push(
-          'Fix failing checks. When you validated that the problems are fixed, commit the changes.',
-        )
-
-        console.info('\n\n=====SOME CHECKS FAILED. FIXING NOW=====')
-
-        await runAgentInSandbox(additionalPrompts.join('\n'))
-      }
+    if (config.checks?.defer) {
+      await runAllChecks()
     }
   } catch (e) {
     const limitReached = await usageLimitReached()
@@ -118,5 +89,44 @@ async function fetchAndPersistOpenIssuesAndLastCommits(): Promise<{
   return {
     openIssues,
     lastCommits,
+  }
+}
+
+async function runAllChecks(): Promise<void> {
+  if (!config.checks) {
+    return
+  }
+
+  if (config.checks.fmtCmd) {
+    await runCmd(config.checks.fmtCmd)
+    await runCmd('git add -A')
+
+    const nothingStaged = await runCmd('git diff --cached --quiet')
+
+    if (!nothingStaged) {
+      await runCmd('git commit -m "fmt"')
+    }
+  }
+
+  const { lint, test } = await runLintAndTest(config.checks)
+
+  const additionalPrompts: string[] = ['Failed checks:']
+
+  if (!lint) {
+    additionalPrompts.push(`- linter: use "${config.checks.lintCmd}"`)
+  }
+
+  if (!test) {
+    additionalPrompts.push(`- tests: use "${config.checks.testCmd}"`)
+  }
+
+  if (additionalPrompts.length > 1) {
+    additionalPrompts.push(
+        'Fix failing checks. When you validated that the problems are fixed, commit the changes.',
+    )
+
+    console.info('\n\n=====SOME CHECKS FAILED. FIXING NOW=====')
+
+    await runAgentInSandbox(additionalPrompts.join('\n'))
   }
 }

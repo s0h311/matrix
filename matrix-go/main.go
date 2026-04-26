@@ -77,36 +77,48 @@ func run(cfg *Config) error {
       break
     }
 
-    if cfg.Checks == nil {
-      continue
-    }
-
-    if cfg.Checks.Fmt != "" {
-      runCmd(cfg.Checks.Fmt)
-      runCmd("git add -A")
-      // only commit if something was staged
-      if !runCmd("git diff --cached --quiet") {
-        runCmd(`git commit -m "fmt"`)
-      }
-    }
-
-    lint, test := runChecks(cfg.Checks)
-
-    if !lint || !test {
-      var parts []string
-      parts = append(parts, "Failed checks:")
-      if !lint {
-        parts = append(parts, fmt.Sprintf(`- linter: use "%s"`, cfg.Checks.Lint))
-      }
-      if !test {
-        parts = append(parts, fmt.Sprintf(`- tests: use "%s"`, cfg.Checks.Test))
-      }
-      parts = append(parts, "Fix failing checks. When you validated that the problems are fixed, commit the changes.")
-
-      fmt.Println("\n\n=====SOME CHECKS FAILED. FIXING NOW=====")
-      if _, err := runAgentInSandbox(strings.Join(parts, "\n")); err != nil {
+    if cfg.Checks != nil && !cfg.Checks.Defer {
+      if err := runAllChecks(cfg); err != nil {
         return err
       }
+    }
+  }
+
+  if cfg.Checks != nil && cfg.Checks.Defer {
+    if err := runAllChecks(cfg); err != nil {
+      return err
+    }
+  }
+
+  return nil
+}
+
+func runAllChecks(cfg *Config) error {
+  if cfg.Checks.FmtCmd != "" {
+    runCmd(cfg.Checks.FmtCmd)
+    runCmd("git add -A")
+    // only commit if something was staged
+    if !runCmd("git diff --cached --quiet") {
+      runCmd(`git commit -m "fmt"`)
+    }
+  }
+
+  lint, test := runChecks(cfg.Checks)
+
+  if !lint || !test {
+    var parts []string
+    parts = append(parts, "Failed checks:")
+    if !lint {
+      parts = append(parts, fmt.Sprintf(`- linter: use "%s"`, cfg.Checks.LintCmd))
+    }
+    if !test {
+      parts = append(parts, fmt.Sprintf(`- tests: use "%s"`, cfg.Checks.TestCmd))
+    }
+    parts = append(parts, "Fix failing checks. When you validated that the problems are fixed, commit the changes.")
+
+    fmt.Println("\n\n=====SOME CHECKS FAILED. FIXING NOW=====")
+    if _, err := runAgentInSandbox(strings.Join(parts, "\n")); err != nil {
+      return err
     }
   }
   return nil
