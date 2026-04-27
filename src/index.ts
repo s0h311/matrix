@@ -5,6 +5,8 @@ import {
   findOpenIssues,
   findLastCommits,
   type Issue,
+  addIssueDependencies,
+  type IssueDependencyMap,
   LAST_COMMITS_FILE_PATH,
   OPEN_ISSUES_FILE_PATH,
 } from './issues.ts'
@@ -15,6 +17,25 @@ import { usageLimitReached } from './usage.ts'
 const config = getConfig()
 const SRC_PROMPT_FILE_PATH = `${import.meta.dirname}/../prompt.md`
 const TMP_PROMPT_FILE_PATH = '.matrix/prompt.md'
+
+const args = process.argv.slice(2)
+
+if (args[0] === 'issues' && args[1] === 'dependencies' && args[2] === 'add') {
+  const raw = args[3]
+
+  if (!raw) {
+    console.error('Usage: matrix issues dependencies add \'{"<issue>": [<dep>, ...],...}\'')
+    process.exit(1)
+  }
+
+  console.log(raw)
+
+  const map: IssueDependencyMap = JSON.parse(raw)
+
+  await addIssueDependencies(map)
+
+  process.exit(0)
+}
 
 await main()
 
@@ -121,9 +142,7 @@ async function runAllChecks(): Promise<void> {
   }
 
   if (additionalPrompts.length > 1) {
-    additionalPrompts.push(
-        'Fix failing checks. When you validated that the problems are fixed, commit the changes.',
-    )
+    additionalPrompts.push('Fix failing checks. When you validated that the problems are fixed, commit the changes.')
 
     console.info('\n\n=====SOME CHECKS FAILED. FIXING NOW=====')
 

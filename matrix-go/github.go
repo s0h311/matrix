@@ -160,6 +160,55 @@ func findLastCommits(owner, repo string) ([]Commit, error) {
   return result, nil
 }
 
+type IssueDependencyMap map[int][]int
+
+func addIssueDependencies(owner, repo string, depMap IssueDependencyMap) error {
+	client := newGitHubClient()
+	ctx := context.Background()
+
+	opts := &github.IssueListByRepoOptions{
+		State:       "open",
+		ListOptions: github.ListOptions{PerPage: 100},
+	}
+
+	var allIssues []*github.Issue
+	for {
+		issues, resp, err := client.Issues.ListByRepo(ctx, owner, repo, opts)
+		if err != nil {
+			return fmt.Errorf("list issues: %w", err)
+		}
+		allIssues = append(allIssues, issues...)
+		if resp.NextPage == 0 {
+			break
+		}
+		opts.Page = resp.NextPage
+	}
+
+	issueIDByNumber := make(map[int]int64, len(allIssues))
+	for _, issue := range allIssues {
+		issueIDByNumber[issue.GetNumber()] = issue.GetID()
+	}
+
+	for dependedIssueNumber, dependingIssueNumbers := range depMap {
+		for _, depNumber := range dependingIssueNumbers {
+			depID, ok := issueIDByNumber[depNumber]
+			if !ok {
+				continue
+			}
+			url := fmt.Sprintf("repos/%s/%s/issues/%d/dependencies/blocked_by", owner, repo, dependedIssueNumber)
+			body := map[string]int64{"issue_id": depID}
+			req, err := client.NewRequest("POST", url, body)
+			if err != nil {
+				return fmt.Errorf("new request: %w", err)
+			}
+			if _, err = client.Do(ctx, req, nil); err != nil {
+				return fmt.Errorf("add dependency %d blocked_by %d: %w", dependedIssueNumber, depNumber, err)
+			}
+		}
+	}
+	return nil
+}
+
 func fetchAndPersist(cfg *Config) ([]Issue, error) {
   issues, err := findOpenIssues(cfg.GitHub.Owner, cfg.GitHub.Repo)
   if err != nil {

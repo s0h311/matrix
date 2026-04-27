@@ -12,6 +12,29 @@ import (
   _ "embed"
 )
 
+func init() {
+  args := os.Args[1:]
+  if len(args) >= 3 && args[0] == "issues" && args[1] == "dependencies" && args[2] == "add" {
+    if len(args) < 4 {
+      fmt.Fprintln(os.Stderr, `Usage: matrix issues dependencies add '{"<issue>": [<dep>, ...],...}'`)
+      os.Exit(1)
+    }
+    raw := args[3]
+    var depMap IssueDependencyMap
+    if err := json.Unmarshal([]byte(raw), &depMap); err != nil {
+      log.Fatalf("invalid JSON: %v", err)
+    }
+    cfg, err := getConfig()
+    if err != nil {
+      log.Fatalf("config: %v", err)
+    }
+    if err := addIssueDependencies(cfg.GitHub.Owner, cfg.GitHub.Repo, depMap); err != nil {
+      log.Fatalf("add dependencies: %v", err)
+    }
+    os.Exit(0)
+  }
+}
+
 //go:embed prompt.md
 var promptContent []byte
 

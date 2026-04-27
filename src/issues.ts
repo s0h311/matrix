@@ -85,5 +85,44 @@ export async function findLastCommits() {
   return result
 }
 
+export async function addIssueDependencies(issueDependencyMap: IssueDependencyMap): Promise<void> {
+  const octokit = createOctokit()
+
+  const { data: issues } = await octokit.request('GET /repos/{owner}/{repo}/issues', {
+    owner: OWNER,
+    repo: REPO,
+    headers: {
+      'X-GitHub-Api-Version': '2026-03-10',
+    },
+  })
+
+  for (const [dependedIssue, dependingIssues] of Object.entries(issueDependencyMap)) {
+    const dependingIssueIds = dependingIssues
+      .map((issueNumber) => {
+        return issues.find(({ number }) => number === issueNumber)
+      })
+      .filter((issue) => issue !== undefined)
+      .map((issue) => issue.id)
+
+    for (const dependingIssueId of dependingIssueIds) {
+      await octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/dependencies/blocked_by', {
+        owner: OWNER,
+        repo: REPO,
+        issue_number: Number(dependedIssue),
+        issue_id: dependingIssueId,
+        headers: {
+          'X-GitHub-Api-Version': '2026-03-10',
+        },
+      })
+    }
+  }
+}
+
+export type IssueDependencyMap = {
+  [dependedIssueNumber: Issue['number']]: Issue['number'][]
+}
+
 export type Issue = Awaited<ReturnType<typeof findOpenIssues>>[0]
 export type Commit = Awaited<ReturnType<typeof findLastCommits>>[0]
+
+;`matrix issues dependencies add '{depended_issue_number_1: [depending_issue_1], depended_issue_number_2: [...]}'`
