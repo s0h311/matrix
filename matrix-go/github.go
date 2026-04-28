@@ -11,9 +11,10 @@ import (
 )
 
 const hitlOnlyLabel = "HITL only"
+const lastNSmithCommits = 5
 
 type Issue struct {
-  ID              int64  `json:"id"` // TODO find out whether we really need this
+  ID              int64  `json:"id"`
   Number          int    `json:"number"`
   Title           string `json:"title"`
   BlockedByIssues []int  `json:"blockedByIssues"`
@@ -146,7 +147,7 @@ func findLastCommits(owner, repo string) ([]Commit, error) {
         Date:    date,
       })
 
-      if len(result) == 10 {
+      if len(result) == lastNSmithCommits {
         return result, nil
       }
     }

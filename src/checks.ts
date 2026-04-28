@@ -28,6 +28,7 @@ export async function runCmd(cmd: string): Promise<boolean> {
   try {
     execSync(cmd, {
       encoding: 'utf-8',
+      stdio: 'inherit',
     })
 
     return true

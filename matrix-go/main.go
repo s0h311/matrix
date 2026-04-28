@@ -1,7 +1,6 @@
 package main
 
 import (
-  "bytes"
   "encoding/json"
   "fmt"
   "log"
@@ -88,16 +87,10 @@ func run(cfg *Config) error {
       break
     }
 
-    result, err := runAgentInSandbox(fmt.Sprintf(
+    if err := runAgentInSandbox(fmt.Sprintf(
       "@%s @%s @%s", openIssuesPath, lastCommitsPath, tmpPromptPath,
-    ))
-    if err != nil {
+    )); err != nil {
       return err
-    }
-
-    if strings.Contains(result, "<promise>COMPLETE</promise>") {
-      fmt.Printf("\n\n=====COMPLETED AFTER %d ITERATIONS=====\n", i)
-      break
     }
 
     if cfg.Checks != nil && !cfg.Checks.Defer {
@@ -140,23 +133,22 @@ func runAllChecks(cfg *Config) error {
     parts = append(parts, "Fix failing checks. When you validated that the problems are fixed, commit the changes.")
 
     fmt.Println("\n\n=====SOME CHECKS FAILED. FIXING NOW=====")
-    if _, err := runAgentInSandbox(strings.Join(parts, "\n")); err != nil {
+    if err := runAgentInSandbox(strings.Join(parts, "\n")); err != nil {
       return err
     }
   }
   return nil
 }
 
-func runAgentInSandbox(prompt string) (string, error) {
+func runAgentInSandbox(prompt string) error {
   cmd := exec.Command("docker", "sandbox", "run", "claude", "--",
     "--permission-mode", "bypassPermissions", "-p", prompt)
-  var out bytes.Buffer
-  cmd.Stdout = &out
+  cmd.Stdout = os.Stdout
   cmd.Stderr = os.Stderr
   if err := cmd.Run(); err != nil {
-    return "", fmt.Errorf("agent: %w", err)
+    return fmt.Errorf("agent: %w", err)
   }
-  return out.String(), nil
+  return nil
 }
 
 func writeJSON(path string, v any) error {

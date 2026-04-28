@@ -10,6 +10,8 @@ const REPO = config.github.repo
 
 const HITL_ONLY_LABEL = 'HITL only'
 
+const LAST_N_SMITH_COMMITS = 5
+
 export async function findOpenIssues() {
   const octokit = createOctokit()
 
@@ -43,7 +45,7 @@ export async function findOpenIssues() {
     const blockedByIssues = blockers.data.map(({ number }) => number)
 
     result.push({
-      id: issue.id, // TODO find out whether we really need this
+      id: issue.id,
       number: issue.number,
       title: issue.title,
       blockedByIssues,
@@ -76,7 +78,7 @@ export async function findLastCommits() {
         })
       }
 
-      if (result.length === 10) {
+      if (result.length === LAST_N_SMITH_COMMITS) {
         return result
       }
     }

@@ -1,10 +1,15 @@
 package main
 
-import "os/exec"
+import (
+	"os"
+	"os/exec"
+)
 
 func runCmd(cmd string) bool {
-	err := exec.Command("sh", "-c", cmd).Run()
-	return err == nil
+	c := exec.Command("sh", "-c", cmd)
+	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
+	return c.Run() == nil
 }
 
 func runChecks(c *Checks) (lint, test bool) {

@@ -40,9 +40,7 @@ if (args[0] === 'issues' && args[1] === 'dependencies' && args[2] === 'add') {
 await main()
 
 async function main() {
-  if (!existsSync('.matrix')) {
-    mkdirSync('.matrix')
-  }
+  ensureMatrixDirExists()
 
   copyFileSync(SRC_PROMPT_FILE_PATH, TMP_PROMPT_FILE_PATH)
 
@@ -94,6 +92,7 @@ async function runAgentInSandbox(prompt: string): Promise<string> {
 
   return execSync(cmd, {
     encoding: 'utf-8',
+    stdio: 'inherit',
   })
 }
 
@@ -147,5 +146,11 @@ async function runAllChecks(): Promise<void> {
     console.info('\n\n=====SOME CHECKS FAILED. FIXING NOW=====')
 
     await runAgentInSandbox(additionalPrompts.join('\n'))
+  }
+}
+
+function ensureMatrixDirExists(): void {
+  if (!existsSync('.matrix')) {
+    mkdirSync('.matrix')
   }
 }
