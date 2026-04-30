@@ -10,7 +10,7 @@ type MatrixConfig = {
 }
 
 export type Checks = {
-  defer?: boolean
+  strategy?: 'afterEach' | 'afterAll'
   fmtCmd?: string
   lintCmd?: string
   testCmd?: string

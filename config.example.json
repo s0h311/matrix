@@ -1,10 +1,11 @@
 {
-  "maxIterations": 50,
+  "maxIterations": 20,
   "github": {
     "owner": "s0h311",
     "repo": "matrix"
   },
   "checks": {
+    "strategy": "afterAll",
     "fmt": "pnpm fmt",
     "lint": "pnpm lint",
     "test": "pnpm test"

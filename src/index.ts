@@ -1,156 +1,27 @@
-import { writeFileSync, existsSync, mkdirSync, rmSync, copyFileSync } from 'node:fs'
-import { execSync } from 'node:child_process'
-import {
-  type Commit,
-  findOpenIssues,
-  findLastCommits,
-  type Issue,
-  addIssueDependencies,
-  type IssueDependencyMap,
-  LAST_COMMITS_FILE_PATH,
-  OPEN_ISSUES_FILE_PATH,
-} from './issues.ts'
-import { getConfig } from './config.ts'
-import { runLintAndTest, runCmd } from './checks.ts'
-import { usageLimitReached } from './usage.ts'
+import { addIssueDependencies, type IssueDependencyMap } from './issues.ts'
+import { run } from './iteration.ts'
 
-const config = getConfig()
-const SRC_PROMPT_FILE_PATH = `${import.meta.dirname}/../prompt.md`
-const TMP_PROMPT_FILE_PATH = '.matrix/prompt.md'
+async function main(): Promise<void> {
+  const args = process.argv.slice(2)
 
-const args = process.argv.slice(2)
+  if (args[0] === 'issues' && args[1] === 'dependencies' && args[2] === 'add') {
+    const raw = args[3]
 
-if (args[0] === 'issues' && args[1] === 'dependencies' && args[2] === 'add') {
-  const raw = args[3]
-
-  if (!raw) {
-    console.error('Usage: matrix issues dependencies add \'{"<issue>": [<dep>, ...],...}\'')
-    process.exit(1)
-  }
-
-  console.log(raw)
-
-  const map: IssueDependencyMap = JSON.parse(raw)
-
-  await addIssueDependencies(map)
-
-  process.exit(0)
-}
-
-await main()
-
-async function main() {
-  ensureMatrixDirExists()
-
-  copyFileSync(SRC_PROMPT_FILE_PATH, TMP_PROMPT_FILE_PATH)
-
-  try {
-    for (let i = 1; i <= config.maxIterations; i++) {
-      console.info(`=====ITERATION ${i} / ${config.maxIterations}=====\n\n`)
-
-      const { openIssues } = await fetchAndPersistOpenIssuesAndLastCommits()
-
-      if (openIssues.length === 0) {
-        console.info(`\n\n=====NO OPEN ISSUES FOUND=====`)
-
-        break
-      }
-
-      await runIteration()
-
-      if (config.checks && !config.checks.defer) {
-        await runAllChecks()
-      }
+    if (!raw) {
+      console.error(`Usage: matrix issues dependencies add '{"<issue>": [<dep>, ...],...}'`)
+      process.exit(1)
     }
 
-    if (config.checks?.defer) {
-      await runAllChecks()
-    }
-  } catch (e) {
-    const limitReached = await usageLimitReached()
+    console.log(raw)
 
-    if (limitReached) {
-      console.info('\n\n=====CLAUDE CODE USAGE LIMIT HAS BEEN REACHED=====')
-    }
+    const map: IssueDependencyMap = JSON.parse(raw)
 
-    if (!limitReached) {
-      console.error(e)
-    }
-  } finally {
-    rmSync(OPEN_ISSUES_FILE_PATH, { force: true })
-    rmSync(LAST_COMMITS_FILE_PATH, { force: true })
-    rmSync(TMP_PROMPT_FILE_PATH, { force: true })
-  }
-}
+    await addIssueDependencies(map)
 
-async function runIteration() {
-  return await runAgentInSandbox(`@${OPEN_ISSUES_FILE_PATH} @${LAST_COMMITS_FILE_PATH} @${TMP_PROMPT_FILE_PATH}`)
-}
-
-async function runAgentInSandbox(prompt: string): Promise<string> {
-  const cmd = `docker sandbox run claude -- --permission-mode bypassPermissions -p "${prompt}"`
-
-  return execSync(cmd, {
-    encoding: 'utf-8',
-    stdio: 'inherit',
-  })
-}
-
-async function fetchAndPersistOpenIssuesAndLastCommits(): Promise<{
-  openIssues: Issue[]
-  lastCommits: Commit[]
-}> {
-  const openIssues = await findOpenIssues()
-  const lastCommits = await findLastCommits()
-
-  writeFileSync(OPEN_ISSUES_FILE_PATH, JSON.stringify(openIssues), { encoding: 'utf-8' })
-  writeFileSync(LAST_COMMITS_FILE_PATH, JSON.stringify(lastCommits), { encoding: 'utf-8' })
-
-  return {
-    openIssues,
-    lastCommits,
-  }
-}
-
-async function runAllChecks(): Promise<void> {
-  if (!config.checks) {
     return
   }
 
-  if (config.checks.fmtCmd) {
-    await runCmd(config.checks.fmtCmd)
-    await runCmd('git add -A')
-
-    const nothingStaged = await runCmd('git diff --cached --quiet')
-
-    if (!nothingStaged) {
-      await runCmd('git commit -m "fmt"')
-    }
-  }
-
-  const { lint, test } = await runLintAndTest(config.checks)
-
-  const additionalPrompts: string[] = ['Failed checks:']
-
-  if (!lint) {
-    additionalPrompts.push(`- linter: use "${config.checks.lintCmd}"`)
-  }
-
-  if (!test) {
-    additionalPrompts.push(`- tests: use "${config.checks.testCmd}"`)
-  }
-
-  if (additionalPrompts.length > 1) {
-    additionalPrompts.push('Fix failing checks. When you validated that the problems are fixed, commit the changes.')
-
-    console.info('\n\n=====SOME CHECKS FAILED. FIXING NOW=====')
-
-    await runAgentInSandbox(additionalPrompts.join('\n'))
-  }
+  await run()
 }
 
-function ensureMatrixDirExists(): void {
-  if (!existsSync('.matrix')) {
-    mkdirSync('.matrix')
-  }
-}
+await main()
