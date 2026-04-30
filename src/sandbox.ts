@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process'
+import process from 'node:process'
 
 const SANDBOX_NAME = 'matrix-sandbox'
 const SANDBOX_IMAGE = 'docker.io/s0h311/matrix:latest'
@@ -25,11 +26,21 @@ export function sandboxExists(): boolean {
   return false
 }
 
-export async function promptAgentInSandbox(prompt: string): Promise<string> {
+export function runInSandbox(cmd: string): string {
+  return execSync(`sbx exec -it ${SANDBOX_NAME} ${cmd}`, {
+    encoding: 'utf-8',
+  })
+}
+
+export function promptAgentInSandbox(prompt: string): string {
   const cmd = `sbx run ${SANDBOX_NAME} -- -p "${prompt}"`
 
   return execSync(cmd, {
     encoding: 'utf-8',
     stdio: 'inherit',
   })
+}
+
+export function reinstallDependencies(): void {
+  runInSandbox(`cd ${process.cwd()} && rm -fr node_modules && pnpm install`)
 }

@@ -10,7 +10,7 @@ import {
 import { getConfig } from './config.ts'
 import { runLintAndTest, runCmd } from './checks.ts'
 import { usageLimitReached } from './usage.ts'
-import { sandboxExists, promptAgentInSandbox } from './sandbox.ts'
+import { sandboxExists, promptAgentInSandbox, reinstallDependencies } from './sandbox.ts'
 
 const config = getConfig()
 const SRC_PROMPT_FILE_PATH = `${import.meta.dirname}/../prompt.md`
@@ -24,6 +24,8 @@ export async function run(): Promise<void> {
   if (!sandboxExists()) {
     return
   }
+
+  reinstallDependencies()
 
   await runIterations()
 }
@@ -69,7 +71,7 @@ async function runIterations(): Promise<void> {
 }
 
 async function runIteration() {
-  return await promptAgentInSandbox(`@${OPEN_ISSUES_FILE_PATH} @${LAST_COMMITS_FILE_PATH} @${TMP_PROMPT_FILE_PATH}`)
+  promptAgentInSandbox(`@${OPEN_ISSUES_FILE_PATH} @${LAST_COMMITS_FILE_PATH} @${TMP_PROMPT_FILE_PATH}`)
 }
 
 async function fetchAndPersistOpenIssuesAndLastCommits(): Promise<{
@@ -121,7 +123,7 @@ async function runAllChecks(): Promise<void> {
 
     console.info('\n\n=====SOME CHECKS FAILED. FIXING NOW=====')
 
-    await promptAgentInSandbox(additionalPrompts.join('\n'))
+    promptAgentInSandbox(additionalPrompts.join('\n'))
   }
 }
 
