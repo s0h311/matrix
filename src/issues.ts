@@ -8,9 +8,10 @@ const config = getConfig()
 const OWNER = config.github.owner
 const REPO = config.github.repo
 
-const HITL_ONLY_LABEL = 'HITL only'
+const READY_FOR_AGENT_LABEL = 'ready-for-agent'
 
 const LAST_N_SMITH_COMMITS = 5
+const COMMIT_HISTORY_SIZE = 10
 
 export async function findOpenIssues() {
   const octokit = createOctokit()
@@ -24,15 +25,15 @@ export async function findOpenIssues() {
   const result = []
 
   for (const issue of openIssues.data) {
-    const isHitlOnly = issue.labels.some((label) => {
+    const isReadyForAgent = issue.labels.some((label) => {
       if (typeof label === 'string') {
-        return label === HITL_ONLY_LABEL
+        return label === READY_FOR_AGENT_LABEL
       }
 
-      return label.name === HITL_ONLY_LABEL
+      return label.name === READY_FOR_AGENT_LABEL
     })
 
-    if (issue.pull_request || isHitlOnly) {
+    if (issue.pull_request || !isReadyForAgent) {
       continue
     }
 
@@ -63,7 +64,7 @@ export async function findLastCommits() {
   const commitIterator = octokit.paginate.iterator(octokit.rest.repos.listCommits, {
     owner: OWNER,
     repo: REPO,
-    per_page: 50,
+    per_page: COMMIT_HISTORY_SIZE,
   })
 
   for await (const response of commitIterator) {

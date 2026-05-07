@@ -1,5 +1,6 @@
 import { execSync } from 'node:child_process'
 import process from 'node:process'
+import { logInfo } from './console.ts'
 
 const SANDBOX_NAME = 'matrix-sandbox'
 const SANDBOX_IMAGE = 'docker.io/s0h311/matrix:latest'
@@ -17,17 +18,19 @@ export function sandboxExists(): boolean {
     return true
   }
 
+  logInfo('CREATING SANDBOX')
+
   execSync(`sbx create --name ${SANDBOX_NAME} -t ${SANDBOX_IMAGE} claude .`, {
     encoding: 'utf-8',
   })
 
-  console.info(`\n\nIMPORTANT: run "sbx run ${SANDBOX_IMAGE}" and then run "/login" to login into claude`)
+  logInfo(`IMPORTANT: run "sbx run ${SANDBOX_NAME}" and then run "/login" to login into claude`)
 
   return false
 }
 
 export function runInSandbox(cmd: string): string {
-  return execSync(`sbx exec -it ${SANDBOX_NAME} ${cmd}`, {
+  return execSync(`sbx exec ${SANDBOX_NAME} ${cmd}`, {
     encoding: 'utf-8',
   })
 }
@@ -42,5 +45,5 @@ export function promptAgentInSandbox(prompt: string): string {
 }
 
 export function reinstallDependencies(): void {
-  runInSandbox(`cd ${process.cwd()} && rm -fr node_modules && pnpm install`)
+  runInSandbox(`"cd ${process.cwd()} && rm -fr node_modules && pnpm install"`)
 }
