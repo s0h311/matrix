@@ -1,8 +1,9 @@
 import { execSync } from 'node:child_process'
 import process from 'node:process'
 import { logInfo } from './console.ts'
+import { defined } from './utils.ts'
 
-const SANDBOX_NAME = 'matrix-sandbox'
+const SANDBOX_NAME = `matrix-${defined(process.cwd().split('/').pop(), 'projectName')}`
 const SANDBOX_IMAGE = 'docker.io/s0h311/matrix:latest'
 
 function hasMatrixSandbox(): boolean {
