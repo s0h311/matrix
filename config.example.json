@@ -6,8 +6,8 @@
   },
   "checks": {
     "strategy": "afterAll",
-    "fmt": "pnpm fmt",
-    "lint": "pnpm lint",
-    "test": "pnpm test"
+    "fmtCmd": "pnpm fmt",
+    "lintCmd": "pnpm lint",
+    "testCmd": "pnpm test"
   }
 }

@@ -2,7 +2,7 @@
 
 Issues JSON is provided at start of context. It contains `id`, `number`, `title`, and `blockers` for each open issue.
 
-You've also been passed the last 10 SMITH commits (SHA, date, full message). Review these to understand what work has been done.
+You've also been passed the last couple of SMITH commits (SHA, date, full message). Review these to understand what work has been done.
 
 # TASK SELECTION
 
