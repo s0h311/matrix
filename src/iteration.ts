@@ -111,11 +111,11 @@ async function runAllChecks(): Promise<void> {
   const additionalPrompts: string[] = ['Failed checks:']
 
   if (!lint) {
-    additionalPrompts.push(`- linter: use "${config.checks.lintCmd}"`)
+    additionalPrompts.push(`- linter: !"${config.checks.lintCmd}"`)
   }
 
   if (!test) {
-    additionalPrompts.push(`- tests: use "${config.checks.testCmd}"`)
+    additionalPrompts.push(`- tests !"${config.checks.testCmd}"`)
   }
 
   if (additionalPrompts.length > 1) {
