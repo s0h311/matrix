@@ -2,6 +2,7 @@ import { execSync } from 'node:child_process'
 import process from 'node:process'
 import { logInfo } from './console.ts'
 import { defined } from './utils.ts'
+import type { Agent } from './config.ts'
 
 const SANDBOX_NAME = `matrix-${defined(process.cwd().split('/').pop(), 'projectName')}`
 const SANDBOX_IMAGE = 'docker.io/s0h311/matrix:latest'
@@ -36,8 +37,8 @@ export function runInSandbox(cmd: string): string {
   })
 }
 
-export function promptAgentInSandbox(prompt: string): string {
-  const cmd = `sbx run ${SANDBOX_NAME} -- -p "${prompt}"`
+export function promptAgentInSandbox(prompt: string, config: { agent: Agent }): string {
+  const cmd = `sbx run ${SANDBOX_NAME} -- --model ${config.agent.model} --effort ${config.agent.effort} -p "${prompt}"`
 
   return execSync(cmd, {
     encoding: 'utf-8',

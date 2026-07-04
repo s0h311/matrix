@@ -11,6 +11,8 @@ import { getConfig } from './config.ts'
 import { runLintAndTest, runCmd } from './checks.ts'
 import { usageLimitReached } from './usage.ts'
 import { sandboxExists, promptAgentInSandbox, reinstallDependencies } from './sandbox.ts'
+import process from 'node:process'
+import { execSync } from 'child_process'
 
 const config = getConfig()
 const SRC_PROMPT_FILE_PATH = `${import.meta.dirname}/../prompt.md`
@@ -71,7 +73,9 @@ async function runIterations(): Promise<void> {
 }
 
 async function runIteration() {
-  promptAgentInSandbox(`@${OPEN_ISSUES_FILE_PATH} @${LAST_COMMITS_FILE_PATH} @${TMP_PROMPT_FILE_PATH}`)
+  promptAgentInSandbox(`@${OPEN_ISSUES_FILE_PATH} @${LAST_COMMITS_FILE_PATH} @${TMP_PROMPT_FILE_PATH}`, {
+    agent: config.agent,
+  })
 }
 
 async function fetchAndPersistOpenIssuesAndLastCommits(): Promise<{
@@ -94,6 +98,10 @@ async function runAllChecks(): Promise<void> {
   if (!config.checks) {
     return
   }
+
+  execSync(`cd ${process.cwd()} && rm -fr node_modules && pnpm install`, {
+    encoding: 'utf-8',
+  })
 
   if (config.checks.fmtCmd) {
     await runCmd(config.checks.fmtCmd)
