@@ -1,4 +1,4 @@
-FROM node:24-trixie
+FROM arm64v8/node:26-trixie
 
 RUN apt update -y
 RUN apt upgrade -y

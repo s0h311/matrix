@@ -58,7 +58,7 @@ Keep it concise.
 
 # THE ISSUE
 
-If the task is complete, close the original GitHub issue.
+If the task is complete, close the original GitHub issue. No need to push. You have no push rights.
 
 If the task is not complete, leave a comment on the GitHub issue with what was done.
 

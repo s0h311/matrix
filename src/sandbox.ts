@@ -32,7 +32,7 @@ export function sandboxExists(): boolean {
 }
 
 export function runInSandbox(cmd: string): string {
-  return execSync(`sbx exec ${SANDBOX_NAME} ${cmd}`, {
+  return execSync(`sbx exec -w ${process.cwd()} ${SANDBOX_NAME} ${cmd}`, {
     encoding: 'utf-8',
   })
 }
@@ -47,5 +47,5 @@ export function promptAgentInSandbox(prompt: string, config: { agent: Agent }): 
 }
 
 export function reinstallDependencies(): void {
-  runInSandbox(`"cd ${process.cwd()} && rm -fr node_modules && pnpm install"`)
+  runInSandbox(`rm -fr node_modules && pnpm install`)
 }
