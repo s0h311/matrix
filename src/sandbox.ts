@@ -26,7 +26,7 @@ export function sandboxExists(): boolean {
     encoding: 'utf-8',
   })
 
-  logInfo(`IMPORTANT: run "sbx run ${SANDBOX_NAME}" and then run "/login" to login into claude`)
+  logInfo(`IMPORTANT: run "sbx run --name ${SANDBOX_NAME}" and then run "/login" to login into claude`)
 
   return false
 }
@@ -38,7 +38,7 @@ export function runInSandbox(cmd: string): string {
 }
 
 export function promptAgentInSandbox(prompt: string, config: { agent: Agent }): string {
-  const cmd = `sbx run ${SANDBOX_NAME} -- --model ${config.agent.model} --effort ${config.agent.effort} -p "${prompt}"`
+  const cmd = `sbx run --name ${SANDBOX_NAME} -- --model ${config.agent.model} --effort ${config.agent.effort} -p "${prompt}"`
 
   return execSync(cmd, {
     encoding: 'utf-8',
