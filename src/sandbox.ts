@@ -31,8 +31,12 @@ export function sandboxExists(): boolean {
   return false
 }
 
+function shellQuote(value: string): string {
+  return `'${value.replaceAll("'", `'\\''`)}'`
+}
+
 export function runInSandbox(cmd: string): string {
-  return execSync(`sbx exec -w ${process.cwd()} ${SANDBOX_NAME} ${cmd}`, {
+  return execSync(`sbx exec -w ${process.cwd()} ${SANDBOX_NAME} sh -c ${shellQuote(cmd)}`, {
     encoding: 'utf-8',
   })
 }
