@@ -6,8 +6,9 @@ type MatrixConfig = {
     owner: string
     repo: string
   }
-  checks?: Checks
   agent: Agent
+  checks?: Checks
+  review?: boolean
 }
 
 export type Agent = {
@@ -24,6 +25,9 @@ export type Checks = {
 
 const CONFIG_FILE_PATH = '.matrix/config.json'
 
+const DEFAULT_AGENT_MODEL: Agent['model'] = 'opus'
+const DEFAULT_AGENT_EFFORT: Agent['effort'] = 'high'
+
 export function getConfig(): MatrixConfig {
   const contents = readFileSync(CONFIG_FILE_PATH, { encoding: 'utf-8' })
 
@@ -32,8 +36,8 @@ export function getConfig(): MatrixConfig {
   return {
     ...config,
     agent: {
-      model: config.agent?.model ?? 'opus',
-      effort: config.agent?.effort ?? 'xhigh',
+      model: config.agent?.model ?? DEFAULT_AGENT_MODEL,
+      effort: config.agent?.effort ?? DEFAULT_AGENT_EFFORT,
     },
   }
 }

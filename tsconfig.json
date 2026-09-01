@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "module": "NodeNext",
@@ -9,6 +11,5 @@
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true
-  },
-  "files": ["index.ts", "types.ts"]
+  }
 }

@@ -15,13 +15,21 @@ import process from 'node:process'
 import { execSync } from 'child_process'
 
 const config = getConfig()
-const SRC_PROMPT_FILE_PATH = `${import.meta.dirname}/../prompt.md`
-const TMP_PROMPT_FILE_PATH = '.matrix/prompt.md'
+
+const SRC_IMPLEMENT_PROMPT_FILE_PATH = `${import.meta.dirname}/../prompts/implement.md`
+const TMP_IMPLEMENT_PROMPT_FILE_PATH = '.matrix/implement-prompt.md'
+
+const SRC_REVIEW_PROMPT_FILE_PATH = `${import.meta.dirname}/../prompts/review.md`
+const TMP_REVIEW_PROMPT_FILE_PATH = '.matrix/review-prompt.md'
 
 export async function run(): Promise<void> {
   ensureMatrixDirExists()
 
-  copyFileSync(SRC_PROMPT_FILE_PATH, TMP_PROMPT_FILE_PATH)
+  copyFileSync(SRC_IMPLEMENT_PROMPT_FILE_PATH, TMP_IMPLEMENT_PROMPT_FILE_PATH)
+
+  if (config.review) {
+    copyFileSync(SRC_REVIEW_PROMPT_FILE_PATH, TMP_REVIEW_PROMPT_FILE_PATH)
+  }
 
   if (!sandboxExists()) {
     return
@@ -34,6 +42,7 @@ export async function run(): Promise<void> {
 
 async function runIterations(): Promise<void> {
   try {
+    // IMPLEMENTATION PHASE
     for (let i = 1; i <= config.maxIterations; i++) {
       console.info(`=====ITERATION ${i} / ${config.maxIterations}=====\n\n`)
 
@@ -55,6 +64,13 @@ async function runIterations(): Promise<void> {
     if (config.checks?.strategy === 'afterAll') {
       await runAllChecks()
     }
+
+    // REVIEW PHASE
+    if (config.review) {
+      console.info(`\n\n=====RUNNING REVIEW=====`)
+
+      await runReview()
+    }
   } catch (e) {
     const limitReached = await usageLimitReached()
 
@@ -68,12 +84,19 @@ async function runIterations(): Promise<void> {
   } finally {
     rmSync(OPEN_ISSUES_FILE_PATH, { force: true })
     rmSync(LAST_COMMITS_FILE_PATH, { force: true })
-    rmSync(TMP_PROMPT_FILE_PATH, { force: true })
+    rmSync(TMP_IMPLEMENT_PROMPT_FILE_PATH, { force: true })
+    rmSync(TMP_REVIEW_PROMPT_FILE_PATH, { force: true })
   }
 }
 
-async function runIteration() {
-  promptAgentInSandbox(`@${OPEN_ISSUES_FILE_PATH} @${LAST_COMMITS_FILE_PATH} @${TMP_PROMPT_FILE_PATH}`, {
+async function runIteration(): Promise<void> {
+  promptAgentInSandbox(`@${OPEN_ISSUES_FILE_PATH} @${LAST_COMMITS_FILE_PATH} @${TMP_IMPLEMENT_PROMPT_FILE_PATH}`, {
+    agent: config.agent,
+  })
+}
+
+async function runReview(): Promise<void> {
+  promptAgentInSandbox(`@${TMP_REVIEW_PROMPT_FILE_PATH}`, {
     agent: config.agent,
   })
 }
@@ -131,7 +154,7 @@ async function runAllChecks(): Promise<void> {
 
     console.info('\n\n=====SOME CHECKS FAILED. FIXING NOW=====')
 
-    promptAgentInSandbox(additionalPrompts.join('\n'))
+    promptAgentInSandbox(additionalPrompts.join('\n'), { agent: config.agent })
   }
 }
 
