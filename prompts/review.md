@@ -9,6 +9,7 @@ If the .claude/skills/code-review/SKILL.md is present continue, otherwise do not
 3. For each single fix spawn a subagent (subsequently). Grouping fixes is okay as long as they don't get too big
 4. Compare fixes to results from step 1 and 2. If selected fixes are applied correctly than return at this point
 5. If step 4 didn't return run steps 3 and 4 for more time. Then return whatever the result of step 4 was.
+6. Commit changes
 
 # Rules
 
