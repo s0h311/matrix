@@ -10,7 +10,7 @@ import {
 import { getConfig } from './config.ts'
 import { runLintAndTest, runCmd } from './checks.ts'
 import { usageLimitReached } from './usage.ts'
-import { sandboxExists, promptAgentInSandbox, reinstallDependencies } from './sandbox.ts'
+import { sandboxExists, promptAgentInSandbox } from './sandbox.ts'
 import process from 'node:process'
 import { execSync } from 'child_process'
 
@@ -34,8 +34,6 @@ export async function run(): Promise<void> {
   if (!sandboxExists()) {
     return
   }
-
-  reinstallDependencies()
 
   await runIterations()
 }
@@ -121,10 +119,6 @@ async function runAllChecks(): Promise<void> {
   if (!config.checks) {
     return
   }
-
-  execSync(`cd ${process.cwd()} && rm -fr node_modules && pnpm install`, {
-    encoding: 'utf-8',
-  })
 
   if (config.checks.fmtCmd) {
     await runCmd(config.checks.fmtCmd)

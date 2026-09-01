@@ -49,7 +49,3 @@ export function promptAgentInSandbox(prompt: string, config: { agent: Agent }): 
     stdio: 'inherit',
   })
 }
-
-export function reinstallDependencies(): void {
-  runInSandbox(`rm -fr node_modules && pnpm install`)
-}
