@@ -17,10 +17,10 @@ import { execSync } from 'child_process'
 const config = getConfig()
 
 const SRC_IMPLEMENT_PROMPT_FILE_PATH = `${import.meta.dirname}/../prompts/implement.md`
-const TMP_IMPLEMENT_PROMPT_FILE_PATH = '.matrix/implement-prompt.md'
+const TMP_IMPLEMENT_PROMPT_FILE_PATH = '.matrix/implement_prompt.md'
 
 const SRC_REVIEW_PROMPT_FILE_PATH = `${import.meta.dirname}/../prompts/review.md`
-const TMP_REVIEW_PROMPT_FILE_PATH = '.matrix/review-prompt.md'
+const TMP_REVIEW_PROMPT_FILE_PATH = '.matrix/review_prompt.md'
 
 export async function run(): Promise<void> {
   ensureMatrixDirExists()
