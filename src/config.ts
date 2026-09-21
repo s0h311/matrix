@@ -23,7 +23,7 @@ export type Checks = {
   testCmd?: string
 }
 
-const CONFIG_FILE_PATH = '.matrix/config.json'
+const CONFIG_FILE_PATH = 'matrix.config.json'
 
 const DEFAULT_AGENT_MODEL: Agent['model'] = 'opus'
 const DEFAULT_AGENT_EFFORT: Agent['effort'] = 'high'
