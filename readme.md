@@ -12,7 +12,8 @@ Matrix spawns AFK (away from keyboard) agents — each named Smith — that auto
   - Issues - Read and write
   - Pull requests - Read and write
 - Claude Code subscription
-- A PRD broken down into subtasks as GitHub issues
+- A Spec broken down into tickers as GitHub issues
+- Docker Sandboxes (sbx) installed
 
 ## Setup
 
