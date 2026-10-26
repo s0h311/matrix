@@ -11,8 +11,7 @@ import { getConfig } from './config.ts'
 import { runLintAndTest, runCmd } from './checks.ts'
 import { usageLimitReached } from './usage.ts'
 import { sandboxExists, promptAgentInSandbox } from './sandbox.ts'
-import process from 'node:process'
-import { execSync } from 'child_process'
+import consola from 'consola'
 
 const config = getConfig()
 
@@ -42,12 +41,12 @@ async function runIterations(): Promise<void> {
   try {
     // IMPLEMENTATION PHASE
     for (let i = 1; i <= config.maxIterations; i++) {
-      console.info(`=====ITERATION ${i} / ${config.maxIterations}=====\n\n`)
+      consola.info(`Iteration  ${i} / ${config.maxIterations}\n`)
 
       const { openIssues } = await fetchAndPersistOpenIssuesAndLastCommits()
 
       if (openIssues.length === 0) {
-        console.info(`\n\n=====NO OPEN ISSUES FOUND=====`)
+        consola.info(`No open issues found\n`)
 
         break
       }
@@ -65,19 +64,21 @@ async function runIterations(): Promise<void> {
 
     // REVIEW PHASE
     if (config.review) {
-      console.info(`\n\n=====RUNNING REVIEW=====`)
+      consola.info(`Starting review\n`)
 
       await runReview()
     }
   } catch (e) {
-    const limitReached = await usageLimitReached()
+    const { limitReached, resetsAt } = await usageLimitReached()
 
     if (limitReached) {
-      console.info('\n\n=====CLAUDE CODE USAGE LIMIT HAS BEEN REACHED=====')
+      consola.info(`Claude Code usage limit reached\n`)
+      // TODO use proper formatting
+      consola.info(`Resets at ${resetsAt}\n`)
     }
 
     if (!limitReached) {
-      console.error(e)
+      consola.error(e)
     }
   } finally {
     rmSync(OPEN_ISSUES_FILE_PATH, { force: true })
@@ -146,7 +147,7 @@ async function runAllChecks(): Promise<void> {
   if (additionalPrompts.length > 1) {
     additionalPrompts.push('Fix failing checks. When you validated that the problems are fixed, commit the changes.')
 
-    console.info('\n\n=====SOME CHECKS FAILED. FIXING NOW=====')
+    consola.info('Some checks failed. Fixing now\n')
 
     promptAgentInSandbox(additionalPrompts.join('\n'), { agent: config.agent })
   }

@@ -1,8 +1,8 @@
 import { execSync } from 'node:child_process'
 import process from 'node:process'
-import { logInfo } from './console.ts'
 import { defined } from './utils.ts'
 import type { Agent } from './config.ts'
+import consola from 'consola'
 
 const SANDBOX_NAME = `matrix-${defined(process.cwd().split('/').pop(), 'projectName')}`
 const SANDBOX_IMAGE = 'docker.io/s0h311/matrix:latest'
@@ -20,13 +20,13 @@ export function sandboxExists(): boolean {
     return true
   }
 
-  logInfo('CREATING SANDBOX')
+  consola.info('Creating sandbox\n')
 
   execSync(`sbx create --name ${SANDBOX_NAME} -t ${SANDBOX_IMAGE} claude .`, {
     encoding: 'utf-8',
   })
 
-  logInfo(`IMPORTANT: run "sbx run --name ${SANDBOX_NAME}" and then run "/login" to login into claude`)
+  consola.info('run "sbx run --name ${SANDBOX_NAME}" and then run "/login" to login into claude\n')
 
   return false
 }

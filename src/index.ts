@@ -1,3 +1,4 @@
+import { consola } from 'consola'
 import { addIssueDependencies, type IssueDependencyMap } from './issues.ts'
 import { run } from './iteration.ts'
 
@@ -8,11 +9,9 @@ async function main(): Promise<void> {
     const raw = args[3]
 
     if (!raw) {
-      console.error(`Usage: matrix issues dependencies add '{"<issue>": [<dep>, ...],...}'`)
+      consola.error(`Usage: matrix issues dependencies add '{"<issue>": [<dep>, ...],...}'\n`)
       process.exit(1)
     }
-
-    console.log(raw)
 
     const map: IssueDependencyMap = JSON.parse(raw)
 
