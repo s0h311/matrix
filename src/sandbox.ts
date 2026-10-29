@@ -26,7 +26,7 @@ export function sandboxExists(): boolean {
     encoding: 'utf-8',
   })
 
-  consola.info('run "sbx run --name ${SANDBOX_NAME}" and then run "/login" to login into claude\n')
+  consola.info(`run "sbx run --name ${SANDBOX_NAME}" and then run "/login" to login into claude\n'`)
 
   return false
 }
